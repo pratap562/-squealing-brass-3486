@@ -12,8 +12,8 @@ const redis = redisConnection()
 dotevn.config()
 
 user.post('/signup', async (req, res) => {
-    const { email, password } = req.body
-    if (!email || !password || typeof (email) != 'string' || typeof (password) != 'string') {
+    const { email, password, name } = req.body
+    if (!email || !password || !name || typeof (email) != 'string' || typeof (name) != 'string' || typeof (password) != 'string') {
         return res.status(400).json({ err: 'bad request' })
     }
     console.log('pass test');
@@ -24,6 +24,7 @@ user.post('/signup', async (req, res) => {
         userExist = await UserModel.find({ email })
     } catch (err) {
         console.log('err', err);
+        return res.status(500).json({ err: 'try after some time' })
     }
     console.log(userExist);
     if (userExist.length >= 1) {
@@ -31,22 +32,19 @@ user.post('/signup', async (req, res) => {
     }
 
     // password hashing
-    const username = email.split('@')[0] + Math.floor(Math.random() * 90000) + 1000;
+    console.log('pasword hashing')
     bcrypt.hash(password, 2, async function (err, hash) {
         if (err) {
             return res.status(500).json({ 'err': 'something went wrong try after some time' });
         }
-        // otp sending
-        let uniqueId
         try {
-            uniqueId = await generateotp(email, hash, username)
-            console.log(uniqueId, 'unique id')
+            uniqueId = await generateotp(email, hash, name)
         } catch (err) {
             console.log('err while generating otp', err)
         }
 
-        res.send({ 'msg': "sended the otp to email check", uniqueId })
-        console.log('again', uniqueId)
+        res.send({ 'msg': "sended verify link to email will expire in 10 minute", uniqueId })
+        console.log('again')
         console.log('bahut pass hai');
         // res.cookie('uniqueId', uniqueId, { maxAge: 599990 * 1000, domain: 'elaborate-tiramisu-ba3b1a.netlify.app', secure: true, sameSite: 'None' })
         // res.cookie('uniqueId', uniqueId, { expire: new Date() + 12000 },)
@@ -54,52 +52,6 @@ user.post('/signup', async (req, res) => {
 
 
 
-})
-
-user.post('/verify', async (req, res) => {
-    const { email, uniqueId } = req.body
-    const userOtp = req.headers.otp
-
-    const key = `${email}:${uniqueId}`;
-
-
-    // createnewuser after otp varification
-    const createNewUser = async ([username, hash, email]) => {
-        let newUser = new UserModel({ email, username, password: hash, role: 'user' })
-        console.log('pass to aa gaye', username, hash, email)
-        await newUser.save((err) => {
-            if (err) {
-                console.log('err is comming', err);
-                return res.status(500).json({ 'err': "something went wrong" })
-            } else {
-                console.log('document save sucessfull');
-            }
-        })
-        console.log('pass pass hai');
-        return res.status(201).json({ 'msg': 'user create sucessfull' })
-    }
-
-
-
-    // getint otp from redis to verify
-    await redis.lrange(key, 0, -1, (err, allDetails) => {
-        if (err) {
-            console.log('err in geting the otp from redis while verifying otp', err);
-        } else {
-            console.log(allDetails, 'this is otp');
-            console.log(allDetails[3])
-            let validOtp = allDetails[3]
-            if (validOtp == userOtp) {
-                // user varified
-                console.log('user varified');
-                createNewUser(allDetails)
-                console.log(allDetails);
-            } else {
-                console.log(validOtp, userOtp)
-                return res.status(401).json({ 'err': 'otp varification fail' })
-            }
-        }
-    })
 })
 
 

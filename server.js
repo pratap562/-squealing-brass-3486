@@ -6,7 +6,6 @@ const { httpserver, app } = require('./config/httpConnection')
 const user = require('./routes/user.route')
 const connection = require('./config/db')
 const authenticate = require('./middleware/Authentication/auth')
-const auth = require('./middleware/Authentication/auth2')
 const autharize = require('./middleware/Authorization/autharize')
 // const chat = require('./routes/chat.route')
 

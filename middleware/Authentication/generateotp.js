@@ -1,91 +1,126 @@
-const generateotp = async (email, hash, username) => {
-    const nodemailer = require('nodemailer');
-    let smtpTransport = require('nodemailer-smtp-transport');
+const generateotp = async (email, hash, name) => {
+  const nodemailer = require('nodemailer');
+  const jwt = require('jsonwebtoken')
+  let smtpTransport = require('nodemailer-smtp-transport');
+  require('dotenv').config()
 
-    const redisConnection = require('../../config/redis')
-    const otp = String(Math.floor(Math.random() * 99999) + 11111);
-    const { v4: uuid } = require('uuid');// install uuid package
-    const uniqueId = uuid(); // generate unique identifier
+  //generating verify token
+  let emailVarifyToken = jwt.sign({ email, hash, name }, process.env.EMAILVARIFICATION, { expiresIn: 60 * 10 })
 
-    const saveOtpToRedis = async () => {
-        const redis = redisConnection()
-        const key = `${email}:${uniqueId}`;
-
-        await redis.lpush(key, otp, email, hash, username, async (err, res) => {
-            if (err) {
-                console.log('err is comming while seting the otp email hash username in redis', err)
-            } else {
-                await redis.expire(key, 180, (err, res) => {
-                    if (err) {
-                        console.log(`Error: ${err}`);
-                    } else {
-                        console.log(`Expiration set for key ${key}`);
-                    }
-                });
-                console.log(otp, 'this is otp before redis');
-            }
-        });
-
-        await redis.lrange(key, 0, -1, (err, res) => {
-            if (err) {
-                console.log('err in geting the otp and other email hash username from redis agter setting', err);
-            } else {
-                console.log(res, 'this is key');
-            }
-        })
-    }
-
-    let texting = 'hello brother'
-    let htmll = `<!DOCTYPE html>
-    <html lang="en">
+  let varfLink = `https://jungle-green-colt-cape.cyclic.app/emailverify?token=${emailVarifyToken}`
+  let htmll = `<!DOCTYPE html>
+    <html>
       <head>
+        <title>Email Verification for SchedulMeet</title>
         <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
         <style>
-          h1 {
-            color: red;
-            text-decoration: wavy;
+          #main {
+            width: 45%;
+            margin: auto;
           }
+          .header {
+            width: 20%;
+            text-align: center;
+            display: flex;
+            margin: auto;
+            margin-bottom: 20px;
+            margin-top: 20px;
+          }
+          img {
+            width: 100%;
+          }
+    
+          .content {
+            text-align: center;
+            background-color: antiquewhite;
+            padding: 20px;
+          }
+    
+          .verification-button {
+            background-color: #4caf50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            font-family: "Open Sans", sans-serif;
+          }
+    
+          .footer {
+            background-color: antiquewhite;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            font-family: "Open Sans", sans-serif;
+          }
+          /* Add your CSS styles here */
+          /* Use a font that looks professional */
+          /* Use colors that match your brand */
         </style>
       </head>
       <body>
-        <h1 id="hii">${otp}</h1>
+        <div id="main">
+          <div class="header">
+            <img src="cid:unique@kreata.ee" alt="SchedulMeet Logo" />
+          </div>
+          <div class="content">
+            <h1>Welcome ${name} to SchedulMeet!</h1>
+            <p>
+              Thank you for signing up. To complete your registration, please click
+              on the button below to verify your email address.
+            </p>
+            <a href=${varfLink} class="verification-button"
+              >Verify Email</a
+            >
+          </div>
+          <div class="footer">
+            <p>
+              If you did not sign up for SchedulMeet or have any other concerns,
+              please contact us at support@schedulmeet.com
+            </p>
+          </div>
+        </div>
       </body>
-    </html>`
+    </html>
+    `
 
-    const sendOtpEmail = async () => {
-        console.log(email, 'this is email');
-        console.log(otp, typeof (otp));
-        console.log('find in 40');
-        smtpTransport = nodemailer.createTransport(smtpTransport({
-            service: 'gmail',
-            auth: {
-                user: 'adrianlamo001.eluminati.co@gmail.com',
-                pass: 'rqonssndnnmnjkjc'
-            }
-        }));
-        console.log('fine in 48')
-        const mailOptions = {
-            from: 'adrianlamo001.eluminati.co@gmail.com',
-            to: email,
-            subject: 'test subject',
-            text: 'https://google.com ',
-            html: htmll
-        }
-
-        smtpTransport.sendMail(mailOptions, function (error, response) {
-            if (error) {
-                console.log('error while sending mail', error);
-            }
-        });
+  const sendOtpEmail = async () => {
+    console.log(email, 'this is email');
+    console.log('find in 40');
+    smtpTransport = nodemailer.createTransport(smtpTransport({
+      service: 'gmail',
+      auth: {
+        user: 'adrianlamo001.eluminati.co@gmail.com',
+        pass: 'rqonssndnnmnjkjc'
+      }
+    }));
+    console.log('fine in 48')
+    const mailOptions = {
+      from: 'adrianlamo001.eluminati.co@gmail.com',
+      to: email,
+      subject: 'test subject',
+      text: 'https://google.com ',
+      html: htmll,
+      attachments: [{
+        filename: 'logo.jpg',
+        path: __dirname + '/logo.jpg',
+        cid: 'unique@kreata.ee' //same cid value as in the html img src
+      }]
     }
 
-    await saveOtpToRedis()
-    await sendOtpEmail()
+    smtpTransport.sendMail(mailOptions, function (error, response) {
+      if (error) {
+        console.log('error while sending mail', error);
+      }
+    });
+  }
 
-    return uniqueId
+  sendOtpEmail()
 
 }
 
