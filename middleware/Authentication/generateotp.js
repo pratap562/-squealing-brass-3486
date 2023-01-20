@@ -19,6 +19,7 @@ const generateotp = async (email, hash, name) => {
             width: 45%;
             margin: auto;
           }
+          
           .header {
             width: 20%;
             text-align: center;
