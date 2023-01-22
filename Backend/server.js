@@ -7,23 +7,22 @@ const user = require('./routes/user.route')
 const connection = require('./config/db')
 const authenticate = require('./middleware/Authentication/auth')
 const autharize = require('./middleware/Authorization/autharize')
-// const chat = require('./routes/chat.route')
-
-// const chat = require
-// const auth = require('./middleware/auth2')
-const port = 3000
+const oauth = require('./routes/oauth.route')
+require('dotenv').config()
+const port = 3200
 
 
 
 // let users = { 0: [] }
-app.use(cors({
-    origin: 'https://elaborate-tiramisu-ba3b1a.netlify.app',
-    credentials: true
-}))
+// app.use(cors({
+//     origin: 'https://elaborate-tiramisu-ba3b1a.netlify.app',
+//     credentials: true
+// }))
+app.use(cors())
 // httpserver.use(cors)
 app.use(express.json())
 app.use(cookieParser())
-
+app.use('/auth/google', oauth)
 
 app.get('/', (req, res) => {
     res.send({ 'msg': 'welocme' })
@@ -41,7 +40,6 @@ app.get('/alldata', authenticate, autharize(['admin']), (req, res) => {
 })
 
 
-
 httpserver.listen(port, async () => {
     try {
         await connection
@@ -51,5 +49,3 @@ httpserver.listen(port, async () => {
         console.log('err on connecting db:', err);
     }
 })
-
-
