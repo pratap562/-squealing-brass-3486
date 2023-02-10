@@ -77,8 +77,14 @@ user.post('/login', async (req, res) => {
         let refresh_token = jwt.sign({ email, username: userExist.username }, process.env.REFRESHKEY, { expiresIn: 180 * 180 })
         res.cookie('token', token, { httpOnly: true })
         res.cookie('refresh_token', refresh_token, { httpOnly: true })
-        return res.send({ 'msg': 'signin sucessfull' })
+        return res.send({ 'msg': 'signin sucessfull', token, refresh_token })
     });
+})
+
+
+user.get('/issignup', async (req, res) => {
+    console.log(req.cookies);
+    console.log(req.cookies.issignup)
 })
 
 module.exports = user
