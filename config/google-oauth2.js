@@ -1,4 +1,5 @@
-const passportForSignup = require('passport');
+// const passportForSignup = require('passport');
+const passportForLogin = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { v4: uuid4 } = require('uuid')
 require('dotenv').config()
@@ -12,15 +13,14 @@ const mid = (req, res, next) => {
     console.log("mid");
     console.log("mid");
     console.log("mid");
-    next()
+    // next()
 }
-passportForSignup.use(mid)
-
-passportForSignup.use(new GoogleStrategy({
+passportForLogin.use(mid)
+passportForLogin.use(new GoogleStrategy({
     clientID: process.env.clientID,
     clientSecret: process.env.clientSecret,
-    callbackURL: 'http://localhost:3200/auth/google/signup/callback',
-    // passReqToCallback: true
+    callbackURL: 'http://localhost:3200/auth/google/login/callback',
+    passReqToCallback: true
 },
     async function (req, accessToken, refreshToken, profile, cb) {
         /*
@@ -28,7 +28,10 @@ passportForSignup.use(new GoogleStrategy({
          If yes select the user and pass him to the done callback
          If not create the user and then select him and pass to callback
         */
-        console.log('signup pe hai')
+        console.log('login pe hai laaaaaaaaaaaaa')
+        console.log(req.url, 'haa');
+        console.log(req.path, 'path');
+        console.log(req.body.intent, 'path');
         let data = {
             email: profile._json.email,
             name: profile._json.name,
@@ -41,5 +44,4 @@ passportForSignup.use(new GoogleStrategy({
     }
 ));
 
-
-module.exports = { passportForSignup }
+module.exports = { passportForLogin }

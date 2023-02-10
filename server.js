@@ -7,7 +7,8 @@ const user = require('./routes/user.route')
 const connection = require('./config/db')
 const authenticate = require('./middleware/Authentication/auth')
 const autharize = require('./middleware/Authorization/autharize')
-const oauth = require('./routes/oauth.route')
+const oauthForSignup = require('./routes/oauth.signup.route')
+const oauthForLogin = require('./routes/oauth.login.route')
 require('dotenv').config()
 const port = 3200
 
@@ -22,13 +23,18 @@ app.use(cors())
 // httpserver.use(cors)
 app.use(express.json())
 app.use(cookieParser())
-app.use('/auth/google', oauth)
+app.use('/auth/google/login', oauthForLogin)
+app.use('/auth/google/signup', oauthForSignup)
 
 app.get('/', (req, res) => {
     res.send({ 'msg': 'welocme' })
 })
 app.use('/user', user)
 // app.use('/chat',)
+
+app.get('/islogdin', authenticate, (req, res) => {
+    res.send({ 'msg': 'logdin' })
+})
 
 app.get('/reports', authenticate, (req, res) => {
     res.send({ 'data': 'reports' })
