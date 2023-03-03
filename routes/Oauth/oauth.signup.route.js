@@ -1,7 +1,7 @@
 // const { passportForLogin } = require('../config/google-oauth2')
-const { passportForSignup } = require('../config/google-oauth')
+const { passportForSignup } = require('../../config/google-oauth')
 const oauthForSignup = require('express').Router()
-const UserModel = require('../Models/User.Model')
+const UserModel = require('../../Models/User.Model')
 require('dotenv').config()
 
 function mid(req, res, next) {
@@ -19,9 +19,9 @@ const setIntent = (req, res, next) => {
 }
 
 
-oauthForSignup.get('/', mid, setIntent, passportForSignup.authenticate('google', { scope: ['profile', 'email'], callbackURL: 'http://localhost:3200/auth/google/signup/callback' }))
+oauthForSignup.get('/', mid, setIntent, passportForSignup.authenticate('google', { scope: ['profile', 'email'], callbackURL: `${process.env.NEXT_URL}/api/auth/google/signup/callback` }))
 
-oauthForSignup.get('/callback', setIntent, passportForSignup.authenticate('google', { failureRedirect: '/signup', session: false, callbackURL: 'http://localhost:3200/auth/google/signup/callback' }),
+oauthForSignup.get('/callback', setIntent, passportForSignup.authenticate('google', { failureRedirect: '/signup', session: false, callbackURL: `${process.env.NEXT_URL}/api/auth/google/signup/callback` }),
     async function (req, res) {
         //sucessfull authentication, redirect home.
         // let newuser = new UserModel(req.user)
@@ -44,23 +44,22 @@ oauthForSignup.get('/callback', setIntent, passportForSignup.authenticate('googl
         if (userExist.length >= 1) {
             console.log('user exist dont need signup');
             res.cookie('userExist', true, { maxAge: 20000 });
-            return res.redirect(`${process.env.NEXT_URL}/signinsignup`)
+            res.cookie('set', 'true', { maxAge: 20000 })
+            res.cookie('set2', true, { maxAge: 20000 })
+            res.cookie('set3', 'true', { maxAge: 20000, httpOnly: true })
+            return res.redirect(`${process.env.NEXT_URL}/signinsignup?#`)
         } else {
-            let newUser = new UserModel({ name, email, password })
+            let newUser = new UserModel({ name, email, password, role: 'user', stage: 1 })
             try {
+                console.log(newUser, 'newuser')
                 await newUser.save()
                 res.cookie('isSignup', 1, { maxAge: 20000 });
                 console.log('work done')
-                return res.redirect(`${process.env.NEXT_URL}/signinsignup`)
+                return res.redirect(`${process.env.NEXT_URL}/signinsignup?#`)
             } catch (err) {
                 console.log('err: ', err);
             }
         }
-
-
-
-
-
         // res.cookie('isSignup', 1, { maxAge: 20000, httpOnly: true, secure: true });
         // res.redirect(`${process.env.NEXT_URL}/signinsignup`)
         // // res.send({ "msg": "hello" })
