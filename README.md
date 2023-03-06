@@ -38,4 +38,4 @@ Backend Deployed link :- https://book-my-counsel-rcdr.onrender.com
 
 ## Api Documentation
 
-https://book-my-counsel-rcdr.onrender.com/api-docs/
+Swagger:- https://book-my-counsel-rcdr.onrender.com/api-docs/
