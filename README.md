@@ -35,3 +35,7 @@ there is .env.local file which contain all environment variables with ther value
 Frontend Deployed link :- https://book-my-counsel-frontend.vercel.app
 
 Backend Deployed link :- https://book-my-counsel-rcdr.onrender.com
+
+## Api Documentation
+
+https://book-my-counsel-rcdr.onrender.com/api-docs/
