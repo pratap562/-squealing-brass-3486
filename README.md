@@ -1,4 +1,4 @@
-# Book My Counsel Frontend (Next Js)
+# Book My Counsel
 
 ## Getting Started
 
