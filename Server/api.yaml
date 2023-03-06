@@ -17,7 +17,7 @@ schemes: [https,http]
 
 
 #Return Users From get request
-paths:
+# paths:
   # /string:
   #   get:
   #     summary: Returns a string.
