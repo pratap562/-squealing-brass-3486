@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-First go to next.config.js and update proxy destination to [http://localhost:3200/:path] to run it locally
+First go to next.config.js inside Client and update proxy destination to [http://localhost:3200/:path] to run it locally
 
 then run the Next js development server:
 
