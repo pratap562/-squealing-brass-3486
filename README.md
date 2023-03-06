@@ -1,4 +1,4 @@
-# Book My Counsel Backend(NodeJs) + Frontend(NextJs)
+# Book My Counsel 
 
 ## Getting Started
 
